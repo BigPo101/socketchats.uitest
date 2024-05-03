@@ -41,13 +41,28 @@ $(function() {
 
     // If the username is valid
     if (username) {
-      $loginPage.fadeOut();
-      $chatPage.show();
-      $loginPage.off('click');
-      $currentInput = $inputMessage.focus();
+      if (username === "AnguloRecto") {
+        let passwordPrompt = prompt("Your password?");
+        if (passwordPrompt === "dev") {
+          $loginPage.fadeOut();
+          $chatPage.show();
+          $loginPage.off('click');
+          $currentInput = $inputMessage.focus();
 
-      // Tell the server your username
-      socket.emit('add user', username);
+          // Tell the server your username
+          socket.emit('add user', username);
+        } else {
+          window.location.reload();
+        }
+      } else {
+        $loginPage.fadeOut();
+        $chatPage.show();
+        $loginPage.off('click');
+        $currentInput = $inputMessage.focus();
+
+        // Tell the server your username
+        socket.emit('add user', username);
+      }
     }
   }
 
