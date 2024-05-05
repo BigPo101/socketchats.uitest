@@ -5,7 +5,7 @@ const ADMINS = [
   
 const COMMANDS = [
     { prefix: "/cmd", rankReq: "Owner", message: "CMD!" },
-    { prefix: "/failure", rankReq: "Owner", message: "LLL!" },
+    { prefix: "/failure", rankReq: "Admin", message: "LLL!" },
 ];
   
 // Export tables
