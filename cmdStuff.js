@@ -1,7 +1,7 @@
 const ADMINS = [
     { username: "AnguloRecto", password: "dev", color: "#000000", rank: "Owner" },
     { username: "Fish", password: "admin", color: "#FF0000", rank: "Admin"},
-    { username: "Big_Po101", password: "347eghalf", color: "#0000ff", rank: "Owner" }
+    { username: "Big_Po101", password: "347eghalf", color: "#0080FE", rank: "Owner" }
 ];
   
 const COMMANDS = [
