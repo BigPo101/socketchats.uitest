@@ -1,4 +1,6 @@
 $(function() {
+  let ADMINS = [];
+  let COMMANDS = [];
   const FADE_TIME = 150; // ms
   const TYPING_TIMER_LENGTH = 400; // ms
   const COLORS = [
@@ -10,6 +12,7 @@ $(function() {
   // Initialize variables
   const $window = $(window);
   const $usernameInput = $('.usernameInput'); // Input for username
+  const $passwordInput = $('.passwordInput'); // Input for password
   const $messages = $('.messages');           // Messages area
   const $inputMessage = $('.inputMessage');   // Input message input box
 
@@ -41,19 +44,11 @@ $(function() {
 
     // If the username is valid
     if (username) {
-      if (username === "AnguloRecto") {
-        let passwordPrompt = prompt("Your password?");
-        if (passwordPrompt === "dev") {
-          $loginPage.fadeOut();
-          $chatPage.show();
-          $loginPage.off('click');
-          $currentInput = $inputMessage.focus();
-
-          // Tell the server your username
-          socket.emit('add user', username);
-        } else {
-          window.location.reload();
-        }
+      const isAdmin = ADMINS.find((admin) => admin.username === username);
+      if (isAdmin) {
+        // Show password input
+        $passwordInput.css('display', 'block');
+        $currentInput = $passwordInput.focus();
       } else {
         $loginPage.fadeOut();
         $chatPage.show();
@@ -65,6 +60,25 @@ $(function() {
       }
     }
   }
+
+  // When the client hits ENTER on their keyboard in the password input
+  $passwordInput.keydown(event => {
+    if (event.which === 13) {
+      let password = $passwordInput.val();
+      const isAdmin = ADMINS.find((admin) => admin.username === username && admin.password === password);
+      if (isAdmin) {
+        $loginPage.fadeOut();
+        $chatPage.show();
+        $loginPage.off('click');
+        $currentInput = $inputMessage.focus();
+
+        // Tell the server your username
+        socket.emit('add user', username);
+      } else {
+        window.location.reload();
+      }
+    }
+  });
 
   // Sends a chat message
   const sendMessage = () => {
@@ -189,14 +203,19 @@ $(function() {
 
   // Gets the color of a username through our hash function
   const getUsernameColor = (username) => {
-    // Compute hash code
-    let hash = 7;
-    for (let i = 0; i < username.length; i++) {
-      hash = username.charCodeAt(i) + (hash << 5) - hash;
+    const isAdmin = ADMINS.find((admin) => admin.username === username);
+    if (isAdmin) {
+      return isAdmin.color;
+    } else {
+      // Compute hash code
+      let hash = 7;
+      for (let i = 0; i < username.length; i++) {
+        hash = username.charCodeAt(i) + (hash << 5) - hash;
+      }
+      // Calculate color
+      const index = Math.abs(hash % COLORS.length);
+      return COLORS[index];
     }
-    // Calculate color
-    const index = Math.abs(hash % COLORS.length);
-    return COLORS[index];
   }
 
   // Keyboard events
@@ -235,6 +254,12 @@ $(function() {
   });
 
   // Socket events
+
+  socket.on('init', (data) => {
+    console.log(data);
+    ADMINS = data.ADMINS;
+    COMMANDS = data.COMMANDS;
+  });
 
   // Whenever the server emits 'login', log the login message
   socket.on('login', (data) => {

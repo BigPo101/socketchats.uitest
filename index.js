@@ -5,6 +5,7 @@ const path = require('path');
 const server = require('http').createServer(app);
 const io = require('socket.io')(server);
 const port = process.env.PORT || 3000;
+const { ADMINS, COMMANDS } = require('./cmdStuff.js');
 
 server.listen(port, () => {
   console.log('Server listening at port %d', port);
@@ -18,30 +19,31 @@ app.use(express.static(path.join(__dirname, 'public')));
 let numUsers = 0;
 
 io.on('connection', (socket) => {
+  socket.emit('init', { ADMINS, COMMANDS });
+
   let addedUser = false;
 
   // when the client emits 'new message', this listens and executes
   socket.on('new message', (data) => {
-    if (data.startsWith("/cmd")) {
-      if (socket.username === "AnguloRecto") {
-        // we tell the client to execute 'new message'
+    let command = COMMANDS.find((cmd) => data.startsWith(cmd.prefix));
+    if (command) {
+      let rank = ADMINS.find((rank) => rank.name === socket.username);
+      if (rank && rank.rank === command.rankReq) {
         socket.broadcast.emit('new message', {
           username: socket.username,
-          message: "CMD!"
-       });
+          message: command.message
+        });
       } else {
-        // we tell the client to execute 'new message'
         socket.broadcast.emit('new message', {
           username: socket.username,
           message: data
         });
       }
     } else {
-      // we tell the client to execute 'new message'
       socket.broadcast.emit('new message', {
         username: socket.username,
         message: data
-     });
+      });
     }
   });
 

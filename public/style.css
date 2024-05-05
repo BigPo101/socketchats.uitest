@@ -72,6 +72,29 @@ ul {
   width: 400px;
 }
 
+.login.page .form .passwordInput {
+  display: none;
+  margin: auto;
+  margin-top: 3%;
+  background-color: transparent;
+  border: none;
+  border-bottom: 2px solid #fff;
+  outline: none;
+  padding-bottom: 15px;
+  text-align: center;
+  width: 400px;
+}
+
+.login.page .passwordInput {
+  font-size: 200%;
+  letter-spacing: 3px;
+}
+
+.login.page .title, .login.page .passwordInput {
+  color: #fff;
+  font-weight: 100;
+}
+
 .login.page .title {
   font-size: 200%;
 }
