@@ -119,6 +119,34 @@ io.on('connection', (socket) => {
         username: socket.username,
         numUsers: numUsers
       });
+      // Function to ban a user
+function banUser(username) {
+  // Find the user in the chat
+  const bannedUser = chat.find((msg) => msg.username === username);
+
+  // Remove the user from the chat
+  if (bannedUser) {
+    const index = chat.indexOf(bannedUser);
+    chat.splice(index, 1);
+    console.log(`User ${username} has been banned.`);
+  } else {
+    console.log(`User ${username} not found.`);
+  }
+}
+
+// Example ban command
+function processCommand(message) {
+  if (message.startsWith('!ban')) {
+    const [, username] = message.split(' ');
+    banUser(username);
+  } else {
+    console.log('Invalid command');
+  }
+}
+
+// Example usage
+processCommand('!ban user1');
+console.log(chat);
     }
   });
 });
